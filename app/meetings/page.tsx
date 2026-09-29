@@ -1,32 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { PlusCircle, Loader2, Calendar } from 'lucide-react';
+import { PlusCircle, Calendar } from 'lucide-react';
 import { MeetingCard } from '@/components/meetings/MeetingCard';
-
-interface Meeting {
-  id: string;
-  title: string;
-  client_name: string;
-  participants: string;
-  date: string;
-  status: string;
-  memories_stored: number;
-  is_demo_mode: number;
-}
+import { DEMO_TRANSCRIPTS } from '@/lib/demo-transcripts';
 
 export default function MeetingsPage() {
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/meetings')
-      .then((r) => r.json())
-      .then((data) => setMeetings(data.meetings || []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  const [meetings, setMeetings] = useState(
+    DEMO_TRANSCRIPTS.map((d) => ({
+      id: d.id,
+      title: d.title,
+      client_name: d.clientName,
+      participants: d.participants,
+      date: d.date,
+      status: 'completed',
+      memories_stored: 7,
+      is_demo_mode: 1,
+    }))
+  );
 
   const handleDelete = (deletedId: string) => {
     setMeetings((prev) => prev.filter((m) => m.id !== deletedId));
@@ -36,8 +28,10 @@ export default function MeetingsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Meetings</h1>
-          <p className="text-gray-400 mt-1">{meetings.length} total meetings</p>
+          <h1 className="text-2xl font-bold text-white">Meeting History</h1>
+          <p className="text-gray-400 mt-1">
+            Acme Fitness Timeline · {meetings.length} meetings connected in Hindsight
+          </p>
         </div>
         <Link
           href="/meetings/new"
@@ -48,16 +42,12 @@ export default function MeetingsPage() {
         </Link>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
-        </div>
-      ) : meetings.length === 0 ? (
+      {meetings.length === 0 ? (
         <div className="text-center py-20">
           <Calendar className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-          <p className="text-gray-400 mb-2">No meetings yet</p>
+          <p className="text-gray-400 mb-2">No meetings found</p>
           <Link href="/meetings/new" className="text-indigo-400 hover:text-indigo-300 text-sm">
-            Create your first meeting →
+            Process a meeting →
           </Link>
         </div>
       ) : (
